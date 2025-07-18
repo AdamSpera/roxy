@@ -1,0 +1,6 @@
+include roxy/static/**/*
+include roxy/templates/**/*
+include roxy/static/ciscoish/**/*
+include roxy/static/ciscoish/SharpSans-Bold/**/*
+include roxy/static/ciscoish/inter/**/*
+include roxy/static/ciscoish/roboto-mono/**/*

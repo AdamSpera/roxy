@@ -5,3 +5,6 @@ venv
 .DS_Store
 .kiro
 .vscode
+.legacy
+tests/__pycache__
+roxy/__pycache__
