@@ -1,0 +1,29 @@
+body {
+    margin: 0px;
+} 
+
+select.m-input {
+    width: 100px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 5.5px;
+    padding-bottom: 5.5px;
+    border-radius: 6px;
+    border: 2px solid var(--color-grey);
+    background-color: var(--color-xlightgrey);
+    font-size: 14px;
+  }
+
+  select.m-input:disabled {
+    background-color: var(--color-xlightgrey);
+    border-color: var(--color-lightgrey);
+  }
+
+  select.m-input.medium {
+    height: 40px;
+  }
+
+  option {
+    font-size: 14px;
+    padding: 10px;
+  }
