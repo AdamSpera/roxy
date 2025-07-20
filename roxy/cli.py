@@ -304,93 +304,10 @@ def show():
     
     Shows all configured port mappings in a formatted table.
     """
-    import json
-    from pathlib import Path
-    from rich.table import Table
+    from .display import load_and_display_port_mappings
     
     try:
-        # Path to the port mappings file
-        mappings_file = Path("roxy/port_mappings.json")
-        
-        # Check if the mappings file exists
-        if not mappings_file.exists():
-            display_info("No port mappings file found.")
-            display_info("Port mappings will be created when you first use the proxy service.")
-            return
-        
-        # Load the mappings
-        try:
-            with open(mappings_file, 'r') as f:
-                content = f.read().strip()
-                if not content:
-                    # Empty file
-                    mappings_data = {}
-                else:
-                    mappings_data = json.loads(content)
-        except json.JSONDecodeError:
-            display_error("Port mappings file contains invalid JSON")
-            display_info("The file may be corrupted. You can delete it to start fresh.")
-            return
-        
-        # Check if there are any mappings
-        if not mappings_data:
-            display_info("No port mappings are currently configured.")
-            display_info("Use the web interface to create port mappings.")
-            return
-        
-        # Create a rich table for displaying the mappings
-        table = Table(title="Current Port Mappings", show_header=True, header_style="bold cyan")
-        table.add_column("IP Address", style="bold", width=15)
-        table.add_column("Protocol", style="bold", width=10)
-        table.add_column("External Port", style="bold", width=13)
-        table.add_column("Internal Port", style="dim", width=13)
-        
-        # Protocol to internal port mapping (from server.py)
-        protocol_ports = {
-            'ssh': 22,
-            'telnet': 23,
-            'http': 80,
-            'https': 443,
-        }
-        
-        # Parse the mappings and add to table
-        # The format is "ip|protocol": external_port
-        delimiter = '|'
-        for key, external_port in mappings_data.items():
-            if delimiter in key:
-                ip, protocol = key.split(delimiter, 1)
-                internal_port = protocol_ports.get(protocol, "Unknown")
-                
-                # Add row to table with appropriate styling
-                table.add_row(
-                    ip,
-                    protocol.upper(),
-                    str(external_port),
-                    str(internal_port)
-                )
-            else:
-                # Handle malformed keys gracefully
-                table.add_row(
-                    "Invalid",
-                    "Invalid",
-                    str(external_port),
-                    "Unknown"
-                )
-        
-        # Display the table
-        console.print()
-        console.print(table)
-        console.print()
-        
-        # Display summary information
-        mapping_count = len(mappings_data)
-        if mapping_count == 1:
-            display_success(f"✓ {mapping_count} port mapping configured")
-        else:
-            display_success(f"✓ {mapping_count} port mappings configured")
-        
-        display_info("These mappings are active when the Roxy service is running.")
-        display_info("Use 'roxy status' to check if the service is currently running.")
+        load_and_display_port_mappings()
         
     except KeyboardInterrupt:
         display_error("Show command interrupted by user")
