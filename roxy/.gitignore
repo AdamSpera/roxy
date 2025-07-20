@@ -1,0 +1,5 @@
+# .gitignore
+localhost.crt
+localhost.key
+venv
+.DS_Store
