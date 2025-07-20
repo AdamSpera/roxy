@@ -92,8 +92,23 @@ def start():
     The service will run in the background.
     """
     from .service import RoxyService
+    from .setup_commands import SetupManager
     
     try:
+        # Check if setup has been completed
+        if not SetupManager.is_setup_complete():
+            display_error("Setup has not been completed")
+            console.print()
+            display_info("Before starting the Roxy service, you need to run the setup process.")
+            display_info("This will generate SSL certificates and configure the environment.")
+            console.print()
+            display_info("Run the following command to complete setup:")
+            console.print("  [bold cyan]roxy setup[/bold cyan]")
+            console.print()
+            display_info("After setup is complete, you can start the service with:")
+            console.print("  [bold cyan]roxy start[/bold cyan]")
+            sys.exit(1)
+        
         service = RoxyService()
         
         # Check if service is already running
@@ -267,7 +282,7 @@ def status():
             # Additional connection info
             console.print()
             display_info("Connection Information:")
-            console.print("• HTTPS endpoint: https://localhost:443", style="blue")
+            console.print(f"• HTTPS endpoint: https://localhost:{status_info.port}", style="blue")
             console.print("• SSL certificates: cert.pem, key.pem", style="blue")
             
         else:

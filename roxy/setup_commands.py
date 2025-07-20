@@ -20,6 +20,41 @@ class SetupManager:
         self.cert_file = self.base_dir / "cert.pem"
         self.key_file = self.base_dir / "key.pem"
     
+    @classmethod
+    def is_setup_complete(cls) -> bool:
+        """Check if setup has been completed successfully."""
+        base_dir = Path.cwd()
+        cert_file = base_dir / "cert.pem"
+        key_file = base_dir / "key.pem"
+        mappings_file = base_dir / "port_mappings.json"
+        
+        # Check if all required files exist
+        if not (cert_file.exists() and key_file.exists() and mappings_file.exists()):
+            return False
+        
+        # Check if SSL certificates are valid
+        try:
+            # Check certificate validity
+            subprocess.run(
+                ["openssl", "x509", "-in", str(cert_file), "-noout", "-text"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            # Check private key validity
+            subprocess.run(
+                ["openssl", "rsa", "-in", str(key_file), "-noout", "-check"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            return True
+            
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+    
     def run_setup(self) -> bool:
         """Execute all setup steps with progress feedback."""
         self.console.print(Panel.fit(
@@ -35,23 +70,27 @@ class SetupManager:
         ]
         
         try:
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=self.console
-            ) as progress:
-                
-                for description, step_func in setup_steps:
+            # Execute each step and display results immediately
+            for description, step_func in setup_steps:
+                # Show spinner for current step
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    console=self.console,
+                    transient=True  # Make progress disappear when done
+                ) as progress:
                     task = progress.add_task(description, total=None)
                     
                     try:
                         success, message = step_func()
                         if not success:
+                            # Remove spinner and show error
                             progress.stop()
                             self.console.print(f"[red]✗ {description} failed: {message}[/red]")
                             return False
                         
-                        progress.update(task, completed=True)
+                        # Remove spinner and show success
+                        progress.stop()
                         self.console.print(f"[green]✓ {description} completed[/green]")
                         
                     except Exception as e:
@@ -146,10 +185,10 @@ class SetupManager:
             # Check if port_mappings.json exists, create if not
             mappings_file = self.base_dir / "port_mappings.json"
             if not mappings_file.exists():
-                mappings_file.write_text("[]")
+                mappings_file.write_text("{}")
             elif mappings_file.stat().st_size == 0:
                 # File exists but is empty, initialize it
-                mappings_file.write_text("[]")
+                mappings_file.write_text("{}")
             
             # Verify SSL certificates one more time
             if not self._validate_ssl_certificates():

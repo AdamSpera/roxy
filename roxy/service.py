@@ -16,10 +16,10 @@ from pathlib import Path
 class ServiceConfig:
     """Configuration for the Roxy service"""
     host: str = "0.0.0.0"
-    port: int = 443
+    port: int = 8443
     workers: int = 4
-    cert_file: str = "roxy/cert.pem"
-    key_file: str = "roxy/key.pem"
+    cert_file: str = "cert.pem"
+    key_file: str = "key.pem"
     app_module: str = "roxy.server:app"
     pid_file: str = "roxy.pid"
 
